@@ -1,3 +1,5 @@
+"use client";
+
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import { getProduct } from "@/services/products";
 import { useQuery } from "@tanstack/react-query";

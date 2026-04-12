@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
-import { logAction } from "@/lib/audit";
 
 
 // UPDATE CUSTOMER
@@ -23,12 +22,6 @@ export async function PATCH(
     },
   });
 
-  await logAction({
-    userId: auth.userId,
-    action: "UPDATE_CUSTOMER",
-    entity: "Customer",
-    entityId: customer.id,
-  });
 
   return NextResponse.json({
     success: true,
@@ -46,13 +39,6 @@ export async function DELETE(
 
   await prisma.customer.delete({
     where: { id: params.id },
-  });
-
-  await logAction({
-    userId: auth.userId,
-    action: "DELETE_CUSTOMER",
-    entity: "Customer",
-    entityId: params.id,
   });
 
   return NextResponse.json({

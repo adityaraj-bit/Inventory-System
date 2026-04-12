@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
-import { logAction } from "@/lib/audit";
 
 
 // UPDATE CATEGORY
@@ -21,12 +20,6 @@ export async function PATCH(
     },
   });
 
-  await logAction({
-    userId: auth.userId,
-    action: "UPDATE_CATEGORY",
-    entity: "Category",
-    entityId: category.id,
-  });
 
   return NextResponse.json({
     success: true,
@@ -47,13 +40,6 @@ export async function DELETE(
     data: {
       isActive: false,
     },
-  });
-
-  await logAction({
-    userId: auth.userId,
-    action: "DELETE_CATEGORY",
-    entity: "Category",
-    entityId: category.id,
   });
 
   return NextResponse.json({

@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/authGuard";
-import { NextResponse } from "next/server";
 import AdmZip from "adm-zip";
 
 function toCSV(data: any[]) {
