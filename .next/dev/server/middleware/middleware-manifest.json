@@ -1,0 +1,83 @@
+{
+  "sorted_middleware": [],
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/node_modules_6ca33780._.js",
+        "server/edge/chunks/[root-of-the-server]__f2b15f93._.js",
+        "server/edge/chunks/turbopack-node_modules_next_dist_esm_build_templates_edge-wrapper_067b6f2e.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/dashboard/:path*{(\\\\.json)}?",
+          "originalSource": "/dashboard/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/products/:path*{(\\\\.json)}?",
+          "originalSource": "/products/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/inventory/:path*{(\\\\.json)}?",
+          "originalSource": "/inventory/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/purchase-orders/:path*{(\\\\.json)}?",
+          "originalSource": "/purchase-orders/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/sales-orders/:path*{(\\\\.json)}?",
+          "originalSource": "/sales-orders/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/customers/:path*{(\\\\.json)}?",
+          "originalSource": "/customers/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/users/:path*{(\\\\.json)}?",
+          "originalSource": "/users/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/suppliers/:path*{(\\\\.json)}?",
+          "originalSource": "/suppliers/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/categories/:path*{(\\\\.json)}?",
+          "originalSource": "/categories/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/warehouses/:path*{(\\\\.json)}?",
+          "originalSource": "/warehouses/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/analytics/:path*{(\\\\.json)}?",
+          "originalSource": "/analytics/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/ai/:path*{(\\\\.json)}?",
+          "originalSource": "/ai/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/admin{(\\\\.json)}?",
+          "originalSource": "/admin"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/admin/backup{(\\\\.json)}?",
+          "originalSource": "/admin/backup"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "development",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "bEHbpMU6aEzxrymiqRM22aKYxQT+wSIXySthEIN3W4E=",
+        "__NEXT_PREVIEW_MODE_ID": "3a22560f1d104e9043bce207c7b0ab39",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "1bdf146b4bc894180bfc1c8fe05362d0f4ae75585d827413da2d41b71185a1ae",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "cb4d1d0ccb41fe0a828726400f06808489950a3ae31881e8b1d0b23e9ffe4dcc"
+      }
+    }
+  },
+  "instrumentation": null,
+  "functions": {}
+}

@@ -1,0 +1,3 @@
+{
+  "/api/admin/restore-db/route": "app/api/admin/restore-db/route.js"
+}
