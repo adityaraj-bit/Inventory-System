@@ -1,15 +1,16 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { variantId: string } }
+  req: NextRequest,
+  context: { params: Promise<{ variantId: string }> }
 ) {
+  const { variantId } = await context.params;
   await requireAuth();
 
   const variant = await prisma.productVariant.findUnique({
-    where: { id: params.variantId },
+    where: { id: variantId },
     include: {
       product: {
         select: {
@@ -35,15 +36,16 @@ export async function GET(
 }
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { variantId: string } }
+  req: NextRequest,
+  context: { params: Promise<{ variantId: string }> }
 ) {
+  const { variantId } = await context.params;
   await requireAuth("ADMIN");
 
   const body = await req.json();
 
   const variant = await prisma.productVariant.update({
-    where: { id: params.variantId },
+    where: { id: variantId },
     data: {
       sku: body.sku,
       attributes: body.attributes
@@ -57,13 +59,14 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { variantId: string } }
+  req: NextRequest,
+  context: { params: Promise<{ variantId: string }> }
 ) {
+  const { variantId } = await context.params;
   await requireAuth("ADMIN");
 
   await prisma.productVariant.delete({
-    where: { id: params.variantId }
+    where: { id: variantId }
   });
 
   return NextResponse.json({

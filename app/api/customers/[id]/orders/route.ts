@@ -1,15 +1,16 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
 export async function GET(
- req: Request,
- { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
  await requireAuth();
 
  const orders = await prisma.salesOrder.findMany({
-   where: { customerId: params.id },
+   where: { customerId: id },
    include: {
      items: { include: { product: true } }
    }

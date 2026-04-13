@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
 // GET ORDERS (Unified)
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   await requireAuth();
 
   const { searchParams } = new URL(req.url);
@@ -41,7 +41,7 @@ export async function GET(req: Request) {
 }
 
 // CREATE ORDER
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const auth = await requireAuth();
 
   const body = await req.json();

@@ -1,16 +1,17 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
 // GET SINGLE PRODUCT
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } },
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await context.params;
   await requireAuth();
 
   const product = await prisma.product.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       category: true,
       supplier: true,
@@ -32,9 +33,10 @@ export async function GET(
 
 // UPDATE PRODUCT
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } },
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await context.params;
   await requireAuth("ADMIN");
 
   const body = await req.json();
@@ -48,7 +50,7 @@ export async function PATCH(
 
 
   const existing = await prisma.product.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!existing) {
@@ -59,7 +61,7 @@ export async function PATCH(
   }
 
   const product = await prisma.product.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       name: body.name,
       description: body.description,
@@ -79,13 +81,14 @@ export async function PATCH(
 
 // SOFT DELETE PRODUCT
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } },
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await context.params;
   await requireAuth("ADMIN");
 
   await prisma.product.update({
-    where: { id: params.id },
+    where: { id },
     data: { isActive: false },
   });
 

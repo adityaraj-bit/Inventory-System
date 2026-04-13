@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
 
@@ -32,7 +32,7 @@ export async function GET() {
 
 
 // CREATE SUPPLIER
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   await requireAuth("ADMIN");
 
   const body = await req.json();

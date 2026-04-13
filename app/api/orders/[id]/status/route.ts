@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   await requireAuth();
 
   const body = await req.json();
@@ -21,7 +22,7 @@ export async function PATCH(
   try {
     const updatedOrder = await prisma.$transaction(async (tx) => {
       const currentOrder = await tx.order.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: { items: true },
       });
 
@@ -48,7 +49,7 @@ export async function PATCH(
       // For simplicity, we'll only handle COMPLETED transitions.
 
       return await tx.order.update({
-        where: { id: params.id },
+        where: { id },
         data: { status },
       });
     });

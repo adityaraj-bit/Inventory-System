@@ -1,15 +1,16 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
 export async function GET(
- req: Request,
- { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
  await requireAuth();
 
  const variants = await prisma.productVariant.findMany({
-   where: { productId: params.id }
+   where: { productId: id }
  });
 
  return NextResponse.json({
@@ -19,16 +20,17 @@ export async function GET(
 }
 
 export async function POST(
- req: Request,
- { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
  const auth = await requireAuth("ADMIN");
 
  const body = await req.json();
 
  const variant = await prisma.productVariant.create({
    data: {
-     productId: params.id,
+     productId: id,
      sku: body.sku,
      attributes: body.attributes
    }

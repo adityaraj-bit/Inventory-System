@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   await requireAuth();
 
   const { searchParams } = new URL(req.url);

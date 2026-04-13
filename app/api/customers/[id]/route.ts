@@ -1,19 +1,20 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
 
 // UPDATE CUSTOMER
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const auth = await requireAuth();
 
   const body = await req.json();
 
   const customer = await prisma.customer.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       name: body.name,
       email: body.email,
@@ -32,13 +33,14 @@ export async function PATCH(
 
 // DELETE CUSTOMER (ADMIN ONLY)
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const auth = await requireAuth("ADMIN");
 
   await prisma.customer.delete({
-    where: { id: params.id },
+    where: { id },
   });
 
   return NextResponse.json({

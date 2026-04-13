@@ -1,19 +1,20 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/authGuard";
 
 
 // UPDATE CATEGORY
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const auth = await requireAuth("ADMIN");
 
   const body = await req.json();
 
   const category = await prisma.category.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       name: body.name,
       isActive: body.isActive,
@@ -30,13 +31,14 @@ export async function PATCH(
 
 // SOFT DELETE CATEGORY
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const auth = await requireAuth("ADMIN");
 
   const category = await prisma.category.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       isActive: false,
     },
