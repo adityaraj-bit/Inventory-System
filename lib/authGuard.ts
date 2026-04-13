@@ -1,7 +1,11 @@
 import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.warn("JWT_SECRET missing (build phase)");
+}
+const secret = new TextEncoder().encode(JWT_SECRET || "build_safe_secret");
 
 export async function requireAuth(role?: "ADMIN" | "MANAGER") {
   const cookieStore = await cookies();

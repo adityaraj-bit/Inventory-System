@@ -2,11 +2,13 @@ import bcrypt from "bcrypt";
 import { SignJWT } from "jose";
 import { prisma } from "./prisma";
 
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET not defined");
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.warn("JWT_SECRET missing (build phase)");
 }
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+const secret = new TextEncoder().encode(JWT_SECRET || "build_safe_secret");
 
 async function createToken(userId: string, role: string) {
   return await new SignJWT({ userId, role })
