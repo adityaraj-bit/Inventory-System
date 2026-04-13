@@ -9,12 +9,12 @@ export async function GET(
   const { id } = await context.params;
  await requireAuth();
 
- const orders = await prisma.salesOrder.findMany({
-   where: { customerId: id },
-   include: {
-     items: { include: { product: true } }
-   }
- });
+  const orders = await prisma.order.findMany({
+    where: { customerId: id, type: "SALE" },
+    include: {
+      items: { include: { product: true } }
+    }
+  });
 
  return NextResponse.json({
    success: true,

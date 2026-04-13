@@ -6,7 +6,7 @@ import { parse } from "csv-parse/sync";
 type ProductCSV = {
   name: string;
   sku: string;
-  basePrice: string;
+  price: string;
   categoryId: string;
   supplierId: string;
 };
@@ -30,18 +30,13 @@ export async function POST(req: NextRequest) {
       data: {
         name: row.name,
         sku: row.sku,
-        basePrice: Number(row.basePrice),
+        price: Number(row.price),
         categoryId: row.categoryId,
         supplierId: row.supplierId
       }
     });
 
-    await prisma.priceHistory.create({
-      data: {
-        productId: product.id,
-        price: product.basePrice
-      }
-    });
+
 
     products.push(product);
   }

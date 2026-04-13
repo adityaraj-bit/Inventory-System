@@ -9,10 +9,10 @@ export async function GET(
   const { id } = await context.params;
  await requireAuth();
 
- const orders = await prisma.purchaseOrder.findMany({
-   where: { supplierId: id },
-   include: { items: true }
- });
+  const orders = await prisma.order.findMany({
+    where: { supplierId: id, type: "PURCHASE" },
+    include: { items: true }
+  });
 
  return NextResponse.json({
    success: true,

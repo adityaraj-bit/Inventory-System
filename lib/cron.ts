@@ -15,8 +15,8 @@ export function startInventoryCron() {
 
       if (products.length === 0) return;
 
-      const lowStock = products.filter(p => p.quantity < 10).length;
-      const overStock = products.filter(p => p.quantity > 100).length;
+      const lowStock = products.filter(p => p.stock < 10).length;
+      const overStock = products.filter(p => p.stock > 100).length;
       const healthyStock = products.length - lowStock - overStock;
 
       const reportText = `
