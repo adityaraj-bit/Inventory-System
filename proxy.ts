@@ -8,7 +8,7 @@ if (!JWT_SECRET) {
 }
 const secret = new TextEncoder().encode(JWT_SECRET || "build_safe_secret");
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const pathname = req.nextUrl.pathname;
 

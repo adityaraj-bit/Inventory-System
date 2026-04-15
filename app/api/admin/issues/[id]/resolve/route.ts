@@ -4,14 +4,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await requireAuth("ADMIN");
     const { action } = await req.json(); // RESOLVE or REFUND
 
     const issue = await prisma.issue.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { booking: true, store: true }
     });
 
@@ -37,7 +38,7 @@ export async function POST(
         });
 
         return await tx.issue.update({
-          where: { id: params.id },
+          where: { id },
           data: { status: "RESOLVED" }
         });
       } else if (action === "REFUND") {
@@ -50,7 +51,7 @@ export async function POST(
         });
 
         return await tx.issue.update({
-          where: { id: params.id },
+          where: { id },
           data: { status: "REFUNDED", refundAmount: netAmount }
         });
       } else {
