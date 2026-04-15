@@ -12,20 +12,30 @@ datasource db {
 //////////////////////////
 
 enum Role {
+  STUDENT
+  STORE_OWNER
   ADMIN
-  MANAGER
 }
 
-enum OrderStatus {
+enum BookingStatus {
   PENDING
   CONFIRMED
-  CANCELLED
+  CHECKED_IN
   COMPLETED
+  CANCELLED
 }
 
-enum OrderType {
-  SALE
-  PURCHASE
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum IssueStatus {
+  OPEN
+  RESOLVED
+  REFUNDED
 }
 
 //////////////////////////
@@ -33,131 +43,179 @@ enum OrderType {
 //////////////////////////
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
+  id              String   @id @default(uuid())
+  name            String
+  email           String   @unique
+  phone           String   @unique
+  password        String
+  role            Role     @default(STUDENT)
+  
+  // Wallet implementation
+  walletBalance   Float    @default(0)
+  frozenBalance   Float    @default(0)
 
-  role      Role     @default(MANAGER)
-  isActive  Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  orders    Order[]
+  stores          Store[]
+  bookings        Booking[]
+  reviews         Review[]
+  withdrawals     Withdrawal[]
+  issues          Issue[]
 }
 
 //////////////////////////
-// CORE ENTITIES
+// STORE SYSTEM
 //////////////////////////
 
-model Category {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  isActive  Boolean  @default(true)
+model Store {
+  id              String   @id @default(uuid())
+  ownerId         String
+  name            String
+  description     String?
+  address         String?
+  latitude        Decimal  @db.Decimal(9, 6)
+  longitude       Decimal  @db.Decimal(9, 6)
+  isVerified      Boolean  @default(false)
+  securityDeposit Float    @default(0) // base deposit per slot or fixed
+  rating          Float    @default(0)
+  pricePerSlot    Float    @default(50)
 
-  createdAt DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  products  Product[]
+  owner           User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  capacities      StoreCapacity[]
+  bookings        Booking[]
+  reviews         Review[]
+  documents       StoreDocument[]
+  issues          Issue[]
+
+  @@index([latitude, longitude])
 }
 
-model Supplier {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  email     String?
-  phone     String?
-  address   String?
-  isActive  Boolean  @default(true)
+model StoreCapacity {
+  id              String   @id @default(uuid())
+  storeId         String
+  date            DateTime @db.Date
+  totalSlots      Int
+  availableSlots  Int
 
-  createdAt DateTime @default(now())
+  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
-  products  Product[]
-  orders    Order[]
-}
-
-model Customer {
-  id        String   @id @default(uuid())
-  name      String
-  email     String?
-  phone     String?
-  address   String?
-
-  createdAt DateTime @default(now())
-
-  orders    Order[]
+  @@unique([storeId, date])
+  @@index([storeId])
 }
 
 //////////////////////////
-// PRODUCT SYSTEM
+// BOOKING SYSTEM
 //////////////////////////
 
-model Product {
+model Booking {
+  id              String        @id @default(uuid())
+  userId          String
+  storeId         String
+  bookingDate     DateTime      @db.Date
+  status          BookingStatus @default(PENDING)
+  qrCode          String?       @unique // Optional now as per user request
+  otp             String?
+  itemCount       Int           @default(1)
+  
+  // Financial Tracking
+  totalPrice      Float         @default(0)
+  platformFee     Float         @default(0)
+  netEntry        Float         @default(0) // Amount to be added to wallet
+  securityPaid    Float         @default(0)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user            User          @relation(fields: [userId], references: [id])
+  store           Store         @relation(fields: [storeId], references: [id])
+  logs            BookingLog[]
+  payment         Payment?
+  issue           Issue?
+}
+
+model BookingLog {
   id          String   @id @default(uuid())
-  name        String
-  description String?
+  bookingId   String
+  status      String
+  timestamp   DateTime @default(now())
 
-  price       Float
-  sku         String   @unique
-
-  stock       Int      @default(0)
-
-  categoryId  String
-  supplierId  String?
-
-  isActive    Boolean  @default(true)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  category    Category  @relation(fields: [categoryId], references: [id])
-  supplier    Supplier? @relation(fields: [supplierId], references: [id])
-
-  orderItems  OrderItem[]
-
-  @@index([categoryId])
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
 
 //////////////////////////
-// ORDER SYSTEM (MERGED)
+// DISPUTE & WITHDRAWAL
 //////////////////////////
 
-model Order {
+model Issue {
   id          String      @id @default(uuid())
-
-  type        OrderType
-
-  customerId  String?
-  supplierId  String?
-
-  status      OrderStatus @default(PENDING)
-  totalAmount Float?
-
+  bookingId   String      @unique
+  userId      String
+  storeId     String
+  reason      String
+  description String?
+  status      IssueStatus @default(OPEN)
+  refundAmount Float      @default(0)
+  
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  createdBy   String
-  user        User @relation(fields: [createdBy], references: [id])
-
-  customer    Customer? @relation(fields: [customerId], references: [id])
-  supplier    Supplier? @relation(fields: [supplierId], references: [id])
-
-  items       OrderItem[]
-
-  @@index([customerId])
-  @@index([supplierId])
+  booking     Booking     @relation(fields: [bookingId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+  store       Store       @relation(fields: [storeId], references: [id])
 }
 
-model OrderItem {
+model Withdrawal {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Float
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+//////////////////////////
+// PAYMENT & REVIEWS
+//////////////////////////
+
+model Payment {
+  id            String        @id @default(uuid())
+  bookingId     String        @unique
+  amount        Float
+  status        PaymentStatus @default(PENDING)
+  paymentMethod String?
+  transactionRef String?
+
+  createdAt     DateTime      @default(now())
+
+  booking       Booking       @relation(fields: [bookingId], references: [id])
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  userId      String
+  storeId     String
+  rating      Int
+  comment     String?
+
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+  store       Store    @relation(fields: [storeId], references: [id])
+}
+
+model StoreDocument {
   id        String   @id @default(uuid())
-  orderId   String
-  productId String
+  storeId   String
+  docType   String   
+  docUrl    String
+  verified  Boolean  @default(false)
 
-  quantity  Int
-  price     Float
-
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
-
-  @@unique([orderId, productId])
-  @@index([productId])
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
 }

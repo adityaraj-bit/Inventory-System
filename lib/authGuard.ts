@@ -7,7 +7,7 @@ if (!JWT_SECRET) {
 }
 const secret = new TextEncoder().encode(JWT_SECRET || "build_safe_secret");
 
-export async function requireAuth(role?: "ADMIN" | "MANAGER") {
+export async function requireAuth(role?: "ADMIN" | "STORE_OWNER" | "STUDENT") {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
@@ -19,10 +19,10 @@ export async function requireAuth(role?: "ADMIN" | "MANAGER") {
 
   const user = payload as {
     userId: string;
-    role: "ADMIN" | "MANAGER";
+    role: "ADMIN" | "STORE_OWNER" | "STUDENT";
   };
 
-  if (role && user.role !== role) {
+  if (role && user.role !== role && user.role !== "ADMIN") {
     throw new Error("Forbidden");
   }
 

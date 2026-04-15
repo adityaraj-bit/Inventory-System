@@ -5,17 +5,21 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    if (!body.name || !body.email || !body.password) {
+    if (!body.name || !body.email || !body.phone || !body.password) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
         { status: 400 }
       );
     }
 
+    const role = body.email.includes("admin@lockerlink.com") ? "ADMIN" : (body.role || "STUDENT");
+
     const { user, token } = await register(
       body.name,
       body.email,
-      body.password
+      body.phone,
+      body.password,
+      role
     );
 
     const res = NextResponse.json({
@@ -23,6 +27,7 @@ export async function POST(req: NextRequest) {
       data: {
         id: user.id,
         email: user.email,
+        phone: user.phone,
         name: user.name,
         role: user.role,
       },

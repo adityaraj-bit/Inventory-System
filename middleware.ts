@@ -9,93 +9,54 @@ if (!JWT_SECRET) {
 const secret = new TextEncoder().encode(JWT_SECRET || "build_safe_secret");
 
 export async function middleware(req: NextRequest) {
-
   const token = req.cookies.get("token")?.value;
   const pathname = req.nextUrl.pathname;
 
-  // Public routes (no auth required)
-  const publicRoutes = ["/login", "/register"];
+  // Public routes
+  const publicRoutes = ["/login", "/register", "/"];
 
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  if (publicRoutes.some(route => pathname === route || pathname.startsWith("/api/auth"))) {
     return NextResponse.next();
   }
 
   // No token → force login
   if (!token) {
+    if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
   try {
-
     const { payload } = await jwtVerify(token, secret);
     const role = payload.role as string;
 
-    /*
-    ADMIN-ONLY ROUTES
-    */
-
-    const adminRoutes = [
-      "/users",
-      "/categories",
-      "/suppliers",
-      "/warehouses",
-      "/admin",
-      "/admin/backup"
-    ];
-
-    if (
-      adminRoutes.some(route => pathname.startsWith(route)) &&
-      role !== "ADMIN"
-    ) {
+    // Admin Routes
+    if (pathname.startsWith("/dashboard/admin") && role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    /*
-    MANAGER + ADMIN ROUTES
-    */
+    // Store Owner Routes
+    if (pathname.startsWith("/dashboard/store") && role !== "STORE_OWNER" && role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
 
-    const sharedRoutes = [
-      "/dashboard",
-      "/products",
-      "/inventory",
-      "/purchase-orders",
-      "/sales-orders",
-      "/customers",
-      "/analytics",
-      "/ai",
-    ];
-
-    if (
-      !sharedRoutes.some(route => pathname.startsWith(route)) &&
-      !adminRoutes.some(route => pathname.startsWith(route))
-    ) {
+    // Student Routes
+    if (pathname.startsWith("/dashboard/student") && role !== "STUDENT" && role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
     return NextResponse.next();
-
   } catch {
-
     return NextResponse.redirect(new URL("/login", req.url));
-
   }
 }
 
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/products/:path*",
-    "/inventory/:path*",
-    "/purchase-orders/:path*",
-    "/sales-orders/:path*",
-    "/customers/:path*",
-    "/users/:path*",
-    "/suppliers/:path*",
-    "/categories/:path*",
-    "/warehouses/:path*",
-    "/analytics/:path*",
-    "/ai/:path*",
-    "/admin",
-    "/admin/backup"
+    "/bookings/:path*",
+    "/stores/:path*",
+    "/admin/:path*",
   ],
 };

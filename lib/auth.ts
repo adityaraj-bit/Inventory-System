@@ -21,12 +21,14 @@ async function createToken(userId: string, role: string) {
 export async function register(
   name: string,
   email: string,
-  password: string
+  phone: string,
+  password: string,
+  role: "STUDENT" | "STORE_OWNER" | "ADMIN" = "STUDENT"
 ) {
   const hashed = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
-    data: { name, email, password: hashed },
+    data: { name, email, phone, password: hashed, role },
   });
 
   const token = await createToken(user.id, user.role);
@@ -35,6 +37,7 @@ export async function register(
     user: {
       id: user.id,
       email: user.email,
+      phone: user.phone,
       name: user.name,
       role: user.role,
     },
@@ -74,4 +77,5 @@ export const getRole = () => {
 };
 
 export const isAdmin = () => getRole() === "ADMIN";
-export const isManager = () => getRole() === "MANAGER";
+export const isStoreOwner = () => getRole() === "STORE_OWNER";
+export const isStudent = () => getRole() === "STUDENT";
